@@ -1,0 +1,391 @@
+-- OBTENER DIRECTIVOS  17
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 1 
+-- OBTENER ADMIN  61
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 2
+-- OBTENER DOCENTES  72
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 3
+
+-- OBTENER DIRECTIVOS  CON UNA CATEGORIA ESPECIFICA
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 1 AND IdCategoria = 22
+
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 2
+SELECT FolioPlaza, IdAnalitico,IdPersona, IdTipoSituacionCategoria, NumeroHora, IdJornadaPersona, IdTipoJornada  FROM PersonalCategoria 
+WHERE IdPersona = 206
+SELECT * FROM Personal  WHERE IdCategoria = 10 
+
+Composicion del Folio Plaza: CodigoAnalitico-IdModalidad-IdAnaliticoTipoHoraDocente-xxx
+
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 2 AND IdCategoria = 200
+
+SELECT pc.IdPersona,pc.IdAnalitico,pc.IdCategoria, pc.FolioPlaza, p.C_NombreCompleto FROM PersonalCategoria AS pc INNER JOIN Personal as p ON (pc.IdPersona = p.IdPersona)
+
+-- TRAER LOS FOLIOS POR TIPO ANALITICO Y CATEGORIA ELEGIDA  Y ACTIVOS ( 1 )
+SELECT
+	pc.IdPersonalCategoria,
+	pc.FolioPlaza,
+	pc.IdTipoSituacionCategoria,
+	pc.IdCategoria,
+	p.C_NombreCompleto,
+	a.IdAnalitico,
+	a.NumeroHoras,
+	a.IdAnaliticoTipoPersona,
+	a.TotalPlazas,
+	a.AutorizoSems,
+	m.Descripcion,
+	atd.NombreHora,
+	tj.NombreJornada
+FROM
+	PersonalCategoria AS pc
+	JOIN Personal AS p ON ( pc.IdPersona = p.IdPersona )
+	JOIN Analitico AS a ON ( pc.IdAnalitico = a.IdAnalitico )
+	JOIN Modalidad AS m ON ( a.IdModalidad = m.IdModalidad )
+	JOIN TipoJornada as tj ON (a.IdTipoJornada = tj.IdTipoJornada) 
+	JOIN AnaliticoTipoHoraDocente AS atd ON ( a.IdAnaliticoTipoHoraDocente = atd.IdAnaliticoTipoHoraDocente )
+WHERE
+	a.IdAnaliticoTipoPersona = 1 
+	AND pc.IdCategoria = 26
+	AND pc.IdTipoSituacionCategoria = 1 
+	AND FolioPlaza != "" ;
+	
+-- 159 "" + 279 != "" 
+-- consultas para ver que categorias coinciden con analiticos y hacer pruebas
+SELECT * FROM PersonalCategoria LIMIT 0, 10
+SELECT * FROM Analitico WHERE IdAnaliticoTipoPersona = 3 and IdCategoria = 5
+
+-- filtros para ver si esta en activo, baja, resguardo 
+SELECT * FROM PersonalCategoria WHERE IdTipoSituacionCategoria != 1
+
+-- DATOS DEL 21 FEB 
+SELECT
+	pc.IdPersonalCategoria,
+	pc.FolioPlaza,
+	pc.IdTipoSituacionCategoria,
+	pc.IdCategoria,
+	p.C_NombreCompleto,
+	a.IdAnalitico,
+	a.NumeroHoras,
+	a.IdAnaliticoTipoPersona,
+	a.TotalPlazas,
+	a.AutorizoSems,
+	m.Descripcion,
+	atd.NombreHora,
+	tj.NombreJornada
+FROM
+	PersonalCategoria AS pc
+	JOIN Personal AS p ON ( pc.IdPersona = p.IdPersona )
+	JOIN Analitico AS a ON ( pc.IdAnalitico = a.IdAnalitico )
+	JOIN Modalidad AS m ON ( a.IdModalidad = m.IdModalidad )
+	JOIN TipoJornada as tj ON (a.IdTipoJornada = tj.IdTipoJornada) 
+	JOIN AnaliticoTipoHoraDocente AS atd ON ( a.IdAnaliticoTipoHoraDocente = atd.IdAnaliticoTipoHoraDocente )
+WHERE
+	a.IdAnaliticoTipoPersona = 3 
+	AND pc.IdCategoria = 5
+	AND pc.IdTipoSituacionCategoria = 1 
+	AND FolioPlaza != "" 
+	ORDER BY FolioPlaza ASC;
+	
+	Select a.IdAnalitico, a.CodigoNombre, a.IdAnaliticoTipoPersona,a.IdModalidad, m.Descripcion from Analitico as a 
+	JOIN Modalidad AS m ON (a.IdModalidad = m.IdModalidad) WHERE IdAnalitico = 9 or IdAnalitico = 117
+	 LIMIT 0,10  -- 117 cat 5 
+	SELECT * FROM Categoria WHERE IdCategoria = 5
+	SELECT * FROM Modalidad LIMIT 0,5
+	SELECT * FROM FolioPlaza LIMIT 0,10
+	
+		Select a.IdAnalitico, a.CodigoNombre, a.IdAnaliticoTipoPersona,a.IdModalidad, m.Descripcion from Analitico as a 
+	JOIN Modalidad AS m ON (a.IdModalidad = m.IdModalidad) WHERE IdAnalitico = 9 or IdAnalitico = 117
+	 LIMIT 0,10  -- 117 cat 5 
+	SELECT * FROM Categoria WHERE IdCategoria = 202
+	SELECT * FROM Modalidad LIMIT 0,5
+	SELECT * FROM FolioPlaza LIMIT 0,10
+	-- BUSCAR EN ANALITICO LA CATEGORIA
+
+	-- BUSCAR EL ANALITICO EN FOLIOS
+	SELECT * FROM FolioPlaza WHERE IdAnalitico= 169
+	-- IDENTIFICANDO RELACION AUTORIZADA FOLIO = 0 SI ESTA AUTORIZADASEMS = 0
+		SELECT * FROM FolioPlaza WHERE Autorizada = 0;
+			SELECT IdAnalitico, AutorizoSems FROM Analitico WHERE IdAnalitico = 112;
+	-- BUSCAR EN PERSONAL CATEGORIA LOS 
+	Select * from PersonalCategoria WHERE FolioPlaza = "EH4627-31001"
+	-- 
+	Select * from Categoria LIMIT 0,2
+	SELECT * FROM FuentePlaza
+	
+		-- ADSCRIPCIONES 
+SELECT * FROM PersonalEstructuraOrganizacional WHERE IdPersona = 167
+Select * from PersonalCategoria WHere IdPersona = 167
+Select * from PersonalCategoria WHere FolioPlaza =  "EH8625-12004"
+SELECT * FROM FolioPlaza WHERE FolioPlaza =  "EH4629-11002"
+	SELECT * FROM Personal  WHERE IdPersona = 125
+-- PERSONAS ACTIVAS A LA FECHA DE CONSULTA
+SELECT IdLTContrato, IdPersona, IdLTTipoContrato, FechaInicial, FechaFinal, FechaContrato, IdTipoEstadoContrato, FechaEstadoContrato, ResguardoPlaza 
+FROM LTContrato WHERE  FechaFinal < NOW() OR FechaFinal IS NULL
+SELECT * FROM LTContrato WHERE IdPersona = 125
+SELECT * FROM PersonalEstructuraOrganizacional WHERE IdPersona = 125
+
+SELECT * FROM LTContratoTerminado WHERE IdLTContrato = 4523
+
+SELECT c.IdLTContrato, c.IdPersona, c.IdLTTipoContrato, c.FechaInicial, c.FechaFinal, c.FechaContrato, c.FechaEstadoContrato, ct.FechaFinalContrato
+FROM LTContrato as c 
+JOIN LTContratoTerminado AS ct ON (ct.IdLTContrato = c.IdLTContrato) WHERE c.IdTipoEstadoContrato = 1 
+
+SELECT * FROM PersonalEstructuraOrganizacional WHERE IdPersona = 125
+SELECT * FROM PersonalCategoria WHERE IdPersona = 125
+-- CONTAR CONTRATOS POR PERSONA 
+SELECT IdLTContrato, COUNT(*) AS TOTAL FROM LTContrato GROUP BY IdPersona HAVING COUNT(*);
+-- CONTAR CONTRATOS POR PERSONA  MAS DE 2 
+SELECT IdPersona, COUNT(*) AS TOTAL FROM LTContrato WHERE FechaFinal > NOW() OR FechaFinal IS NULL GROUP BY IdPersona HAVING COUNT(*) >=2;
+
+
+SELECT
+	pc.IdPersonalCategoria,
+	pc.FolioPlaza,
+	pc.IdTipoSituacionCategoria,
+	pc.IdCategoria,
+	p.C_NombreCompleto,
+	a.IdAnalitico,
+	a.NumeroHoras,
+	a.IdAnaliticoTipoPersona,
+	a.TotalPlazas,
+	a.AutorizoSems,
+	m.Descripcion,
+	atd.NombreHora,
+	tj.NombreJornada 
+FROM
+	PersonalCategoria AS pc
+	JOIN Personal AS p ON ( pc.IdPersona = p.IdPersona )
+	JOIN Analitico AS a ON ( pc.IdAnalitico = a.IdAnalitico )
+	JOIN Modalidad AS m ON ( a.IdModalidad = m.IdModalidad )
+	JOIN TipoJornada AS tj ON ( a.IdTipoJornada = tj.IdTipoJornada )
+	JOIN AnaliticoTipoHoraDocente AS atd ON ( a.IdAnaliticoTipoHoraDocente = atd.IdAnaliticoTipoHoraDocente )
+	JOIN LTContrato AS c ON ( c.IdPersona = p.IdPersona ) 
+WHERE
+	a.IdAnaliticoTipoPersona = 3 
+	AND pc.IdCategoria = 5 
+	AND c.FechaFinal > NOW() 
+	OR c.FechaFinal IS NULL 
+	AND p.IdPersona != 304938 -- mario betteta
+	-- GROUP BY pc.IdPersona
+ORDER BY
+	FolioPlaza ASC 
+	
+	-- FOLIOS SIN USO EN NINGUNA CATEGORIA 1864 en total (autorizada = 1652; no autorizado = 180 ; -1 = 32 )
+	SELECT FP.FolioPlaza, FP.IdAnalitico, PC.IdPersonalCategoria, PC.IdPersona, PC.IdAnalitico AS Analitico FROM FolioPlaza AS FP 
+	RIGHT JOIN PersonalCategoria as PC ON (PC.FolioPlaza = FP.FolioPlaza) WHERE PC.FolioPlaza IS  NULL PC.IdTipoSituacionCategoria = 1 AND PC.IdPersona = 305734;
+	
+	-- 1998 activos (1), 1958 baja (2), 42 resguardo (4), 8 uso por tercero (3), 102 temporal (7), 2 determinar destino (8), 0 fin plaza, 1 IS NULL,   = 4111 + 7 (extraños) = 4118
+	SELECT COUNT(*) FROM PersonalCategoria WHERE IdTipoSituacionCategoria IS NOT NULL and IdTipoSituacionCategoria != 1 and IdTipoSituacionCategoria != 2 and IdTipoSituacionCategoria != 3 and IdTipoSituacionCategoria != 4 and IdTipoSituacionCategoria != 7 and IdTipoSituacionCategoria != 8 and IdTipoSituacionCategoria != 9
+
+
+-- FOLIOS 1864 en total (autorizada = 1652; no autorizado = 180 ; -1 = 32 ) 
+		-- folios sin personal categoria asignados
+	SELECT FP.FolioPlaza, FP.IdAnalitico, PC.IdPersonalCategoria, PC.IdPersona, PC.IdAnalitico AS Analitico FROM FolioPlaza AS FP 
+	LEFT JOIN PersonalCategoria as PC ON (PC.FolioPlaza = FP.FolioPlaza) WHERE PC.FolioPlaza IS  NULL PC.IdTipoSituacionCategoria = 1 AND PC.IdPersona = 305734;
+	-- folios con personal categoria asignados
+	SELECT FP.FolioPlaza, FP.IdAnalitico, PC.IdPersonalCategoria, PC.IdPersona, PC.IdAnalitico AS Analitico FROM FolioPlaza AS FP 
+	RIGHT JOIN PersonalCategoria as PC ON (PC.FolioPlaza = FP.FolioPlaza) WHERE PC.FolioPlaza IS  NOT NULL
+	
+	-- intento 10 para obtener los activos y con categorias sea la condicion que este
+	SELECT
+	pc.IdPersonalCategoria,
+	pc.FolioPlaza,
+	pc.IdTipoSituacionCategoria,
+	pc.IdCategoria,
+	p.C_NombreCompleto,
+	p.IdPersona,
+	a.IdAnalitico,
+	a.IdAnaliticoTipoPersona,
+	c.IdLTContrato,
+	c.FechaFinal
+FROM
+	PersonalCategoria AS pc
+	RIGHT JOIN Personal AS p ON ( pc.IdPersona = p.IdPersona )
+	RIGHT JOIN Analitico AS a ON ( pc.IdAnalitico = a.IdAnalitico )
+	-- RIGHT JOIN PersonalEstructuraOrganizacional (PersonalEstructuraOrganizacional.IdPer)
+	LEFT JOIN LTContrato AS c ON ( c.IdPersona = p.IdPersona ) 
+WHERE
+	a.IdAnaliticoTipoPersona = 1 
+	AND pc.IdCategoria = 26 
+	AND c.FechaFinal > NOW() 
+	OR c.FechaFinal IS NULL 
+	AND c.IdLTContrato IS NOT NULL
+	AND p.IdPersona != 304938 -- mario betteta
+	AND IdTipoSituacionCategoria = 1
+	-- GROUP BY pc.IdPersona
+ORDER BY
+	FolioPlaza ASC 
+	-- 305734
+	
+	-- con DISTINCT porque regresa registros duplicados extrañamente, o activando el group by 
+	-- PERSONAS ACTIVAS CON CATEGORIAS ACTIVAS 
+	
+	SELECT DISTINCT
+	PersonalCategoria.FolioPlaza,
+	PersonalCategoria.IdPersonalCategoria,
+	Personal.C_NombreCompleto,
+	IdTipoSituacionCategoria,
+	IdTipoMovimientoCategoria,
+	FolioPlaza.IdTipoJornada,
+	FolioPlaza.NumeroHoras,
+	FolioPlaza.FechaFinal,
+	FolioPlaza.IdFuentePlaza,
+	FolioPlaza.Autorizada 
+FROM
+	PersonalCategoria
+	LEFT JOIN LTContrato ON ( PersonalCategoria.IdPersona = LTContrato.IdPersona )
+	LEFT JOIN Personal ON ( PersonalCategoria.IdPersona = Personal.IdPersona )
+	LEFT JOIN PersonalEstructuraOrganizacional AS PEO ON ( PEO.IdPersonaPlantilla = PersonalCategoria.IdPersonaPlantilla )
+	LEFT JOIN PersonalPlantilla ON ( LTContrato.IdLTContrato = PersonalPlantilla.IdLTContrato ) 
+	LEFT JOIN FolioPlaza ON ( FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza )
+WHERE
+	( ( PEO.FechaVencimiento > NOW() OR PEO.FechaVencimiento IS NULL ) AND PEO.IdSituacionPersonalEstructuraOrganizacional = 1 ) 
+	AND ( PersonalCategoria.IdTipoSituacionCategoria = 1 OR  PersonalCategoria.IdTipoSituacionCategoria = 7 AND ( PersonalCategoria.FechaFinal > NOW() OR PersonalCategoria.FechaFinal IS NULL ) ) 
+	AND ( PersonalPlantilla.IdAnaliticoTipoPersona = 2 AND PersonalCategoria.IdCategoria = 11 ) 
+	AND (	LTContrato.FechaFinal IS NULL OR LTContrato.FechaFinal > NOW()) 
+ORDER BY
+	PersonalCategoria.FolioPlaza ASC;
+	
+	
+	-- FOLIOS EN RESGUARDO, BAJA sin haber finalizado la plaza
+	-- 1998 activos (1), 1958 baja (2), 42 resguardo (4), 8 uso por tercero (3), 102 temporal (7), 2 determinar destino (8), 0 fin plaza, 1 IS NULL,   = 4111 + 7 (que son 5 o 0) = 4118
+SELECT DISTINCT
+	PersonalCategoria.FolioPlaza,
+	Personal.C_NombreCompleto,
+	IdTipoSituacionCategoria,
+	IdTipoMovimientoCategoria,
+	FolioPlaza.IdTipoJornada,
+	FolioPlaza.NumeroHoras,
+	FolioPlaza.FechaFinal,
+	FolioPlaza.IdFuentePlaza,
+	FolioPlaza.Autorizada 
+FROM
+	PersonalCategoria
+	LEFT JOIN LTContrato ON ( PersonalCategoria.IdPersona = LTContrato.IdPersona )
+	LEFT JOIN Personal ON ( PersonalCategoria.IdPersona = Personal.IdPersona )
+	LEFT JOIN PersonalPlantilla ON ( LTContrato.IdLTContrato = PersonalPlantilla.IdLTContrato )
+	LEFT JOIN FolioPlaza ON ( FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza )
+WHERE
+	( PersonalCategoria.IdTipoSituacionCategoria =8) 
+	AND ( PersonalPlantilla.IdAnaliticoTipoPersona = 3 AND PersonalCategoria.IdCategoria = 5 ) 
+	AND (FolioPlaza.FechaFinal IS NULL OR FolioPlaza.FechaFinal > NOW() ) AND (FolioPlaza.FolioPlaza != "")
+ORDER BY
+	PersonalCategoria.FolioPlaza ASC;
+
+	-- FOLIOS SIN USAR (BAJA, RESGUARDO) QUE NO HAN VENCIDO NI TIENE FIN
+	SELECT DISTINCT
+	FolioPlaza.FolioPlaza,
+	PersonalCategoria.IdPersonalCategoria
+FROM
+	FolioPlaza
+	left JOIN PersonalCategoria ON ( FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza )
+	ORDER BY FolioPlaza	  ;
+	
+	SELECT * FROM PersonalCategoria WHERE IdPersonalCategoria = 12991 -- A01005-16001
+	SELECT C_NombreCompleto FROM Personal WHERE IdPersona = 1325 ;
+	
+	-- CONTAR FOLIOS 
+	SELECT IdPersonalCategoria, FolioPlaza, IdTipoSituacionCategoria FROM PersonalCategoria WHERE FolioPlaza = "EH8619-13000" -- 155
+	SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria FROM FolioPlaza -- 82 -- 1774 = 1856
+  LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza) Order by FolioPlaza ASC -- 155
+	
+	SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria FROM FolioPlaza -- 82 -- 1774 = 1856
+   LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza) Order by FolioPlaza ASC -- 155
+	 LEFT JOIN Analitico ON (PersonalCategoria.IdAnalitico = Analitico.IdAnalitico) 
+WHERE 
+     (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL)
+		 AND (PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4 OR PersonalCategoria.FolioPlaza = "" )
+		 AND (Analitico.IdAnaliticoTipoPersona = 1)
+		 
+		 
+		 SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria, PersonalCategoria.IdTipoSituacionCategoria FROM FolioPlaza -- 82 -- 1774 = 1856
+   LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)  
+	 LEFT JOIN Analitico ON (PersonalCategoria.IdAnalitico = Analitico.IdAnalitico) 
+WHERE 
+     (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL) -- 232 sin idpersonalcategoria  
+		 AND (PersonalCategoria.IdTipoSituacionCategoria = 2) -- 16 resguardo, 1691 activos, 82 temporales, 67 bajas = 1856 + 232(sin asignar) /2088 
+		 
+		 -- consulta especial 1
+		 SELECT IdPersonalCategoria, IdPersona, FolioPlaza, FechaFinal FROM PersonalCategoria WHERE IdTipoSituacionCategoria = 2 OR  IdTipoSituacionCategoria = 4 Order by FolioPlaza
+		 -- modificada
+		 SELECT PersonalCategoria.IdPersonalCategoria, PersonalCategoria.IdPersona, PersonalCategoria.FolioPlaza, PersonalCategoria.FechaFinal, PersonalCategoria.IdTipoSituacionCategoria, FolioPlaza.FechaFinal as Vencimiento_Folio FROM PersonalCategoria 
+	JOIN FolioPlaza ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)
+	WHERE IdTipoSituacionCategoria = 2 OR  IdTipoSituacionCategoria = 4 AND (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal is null) Order by FolioPlaza
+	
+	
+	//// CONSULTAS DEL DIA 27 FEB SIN FIN 
+	
+	
+SELECT DISTINCT
+	FolioPlaza.FolioPlaza,
+	Personal.C_NombreCompleto
+FROM
+	FolioPlaza
+	left JOIN PersonalCategoria ON ( FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza )
+	LEFT JOIN LTContrato ON ( PersonalCategoria.IdPersona = LTContrato.IdPersona )
+	LEFT JOIN PersonalEstructuraOrganizacional AS PEO ON ( PEO.IdPersonaPlantilla = PersonalCategoria.IdPersonaPlantilla )
+	LEFT JOIN PersonalPlantilla ON ( LTContrato.IdLTContrato = PersonalPlantilla.IdLTContrato )
+	LEFT JOIN Personal ON ( Personal.IdPersona  = PersonalCategoria.IdPersona ) 
+WHERE
+-- ( ( PEO.FechaVencimiento > NOW() OR PEO.FechaVencimiento IS NULL ) AND PEO.IdSituacionPersonalEstructuraOrganizacional = 1 ) 
+	 ( PersonalCategoria.IdTipoSituacionCategoria = 2 OR  PersonalCategoria.IdTipoSituacionCategoria = 4 ) AND (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL) 
+	AND (	LTContrato.FechaFinal IS NULL OR LTContrato.FechaFinal > NOW())
+	-- AND (PersonalCategoria.FolioPlaza != "") 
+	 AND ( PersonalPlantilla.IdAnaliticoTipoPersona = 3 AND PersonalCategoria.IdCategoria = 56 ) 
+	-- ORDER BY FolioPlaza.FolioPlaza  ASC
+	-- 1918
+	SELECT COUNT(*) FROM PersonalCategoria WHERE FolioPlaza != "" AND (PersonalCategoria.IdTipoSituacionCategoria = 1 OR PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4 OR PersonalCategoria.IdTipoSituacionCategoria = 7 )
+	
+	SELECT COUNT(*) FROM FolioPlaza -- 1865
+	
+	SELECT DISTINCT
+    FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria
+FROM
+    FolioPlaza
+    RIGHT JOIN PersonalCategoria ON FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza
+   -- LEFT JOIN LTContrato ON PersonalCategoria.IdPersona = LTContrato.IdPersona
+   -- LEFT JOIN PersonalEstructuraOrganizacional AS PEO ON PEO.IdPersonaPlantilla = PersonalCategoria.IdPersonaPlantilla
+   -- LEFT JOIN PersonalPlantilla ON LTContrato.IdLTContrato = PersonalPlantilla.IdLTContrato
+   -- LEFT JOIN Personal ON Personal.IdPersona = PersonalCategoria.IdPersona
+WHERE
+    (PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4)
+    AND (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL)
+
+SELECT * FROM PersonalCategoria -- 82 -- 1774 = 1856
+LEFT JOIN FolioPlaza ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)
+WHERE (PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4)
+    AND (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL)
+		AND (PersonalCategoria.FolioPlaza != "")
+		
+-- PRUEBA 1 PARA FOLIOS TODOS AUNQUE NO TENGAN IDPCAT Y CUMPLAN 
+SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria  FROM FolioPlaza -- 82 -- 1774 = 1856
+   LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)  
+	 LEFT JOIN Analitico ON (PersonalCategoria.IdAnalitico = Analitico.IdAnalitico) 
+WHERE 
+     (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL)	 -- 232 sin idpersonalcategoria  
+		 AND (PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4)-- 16 resguardo, 1691 activos, 82 temporales, 67 bajas = 1856 + 232(sin asignar) /2088
+		 order BY FolioPlaza.FolioPlaza asc 
+-- PRUEBA 2
+SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria  FROM FolioPlaza -- 82 -- 1774 = 1856
+   LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)  
+	 LEFT JOIN Analitico ON (PersonalCategoria.IdAnalitico = Analitico.IdAnalitico) 
+WHERE 
+     (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal IS NULL)	 -- QUE NO ESTE VENCIDO EL FOLIO
+		 OR (PersonalCategoria.FolioPlaza = "")
+		 AND (PersonalCategoria.IdTipoSituacionCategoria = 2 OR PersonalCategoria.IdTipoSituacionCategoria = 4)-- 16 resguardo, 1691 activos, 82 temporales, 67 bajas = 1856 + 232(sin asignar) /2088
+		 order BY FolioPlaza.FolioPlaza asc 
+		 
+		 -- /////////////
+	SELECT IdPersonalCategoria, FolioPlaza, IdTipoSituacionCategoria FROM PersonalCategoria WHERE FolioPlaza = "EH8619-13000" -- 155
+	SELECT  FolioPlaza.FolioPlaza, PersonalCategoria.IdPersonalCategoria FROM FolioPlaza -- 82 -- 1774 = 1856
+  LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza) Order by FolioPlaza ASC -- 155
+	
+	
+	SELECT * FROM PersonalCategoria WHERE FolioPlaza = "A01026-16040"
+	
+	-- 12910 8507
+	SELECT DISTINCT PersonalCategoria.IdPersonalCategoria, PersonalCategoria.IdPersona, PersonalCategoria.FolioPlaza, PersonalCategoria.FechaFinal, PersonalCategoria.IdTipoSituacionCategoria, FolioPlaza.FechaFinal as Vencimiento_Folio FROM  FolioPlaza
+	LEFT JOIN PersonalCategoria ON (FolioPlaza.FolioPlaza = PersonalCategoria.FolioPlaza)
+	WHERE IdTipoSituacionCategoria = 2 OR  IdTipoSituacionCategoria = 4 AND (FolioPlaza.FechaFinal > NOW() OR FolioPlaza.FechaFinal is null) Order by FolioPlaza
+	SELECT * FROM Personal WHERE IdPersona = 304027 -- T16005-16007 // 7777 - T05004-16014 // 7622 -EH9953-22003
+	
+
+	
