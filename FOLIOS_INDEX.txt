@@ -1,0 +1,380 @@
+
+Main.Filtros = null;
+Main.Identidad = null;
+Main.FiltroActual = null;
+Main.ID = null;
+
+Main.load = function () {
+    Mensaje.show("Cargando...");
+    Head.Script.add("/RecursosHumanos/resources/javascript/Bootstrap.js", true);
+    Head.Script.add("/RecursosHumanos/resources/javascript/nachoTools-imp.js", true);
+    Head.Script.add("/RecursosHumanos/resources/javascript/Paginador.js", true);
+    Head.Script.add("/RecursosHumanos/resources/javascript/Filtro.js", true);
+
+    Head.Script.add("/RecursosHumanos/FoliosPlaza/dao.js", true);
+    Head.Script.add("/RecursosHumanos/personal.gestion/DAO.js", true);
+
+    // generador de tabla 
+    Head.Script.add("/RecursosHumanos/DeterminarDestinoPlaza/TablaAnaliticoUsuario.js", true);
+    Head.Script.add("/RecursosHumanos/CatalogoModalidadPersonal/TablaPersonalModalidad.js", true);
+
+    Head.Script.run(function () {
+        loadTabla();
+    });
+
+    function loadTabla() {
+        Head.Script.run(function () {
+            bootstrap();
+        });
+    }
+
+    function bootstrap() {
+        Bootstrap.loadVersion5r1(function () {
+            get("container-principal").className = "container-fluid";
+
+            let ajx = new ajaxRequest("/RecursosHumanos/jsonIdentidad");
+            ajx.setEventoSuccess(function (responseText) {
+                Main.Identidad = JSON.parse(responseText);
+                if (!Main.Identidad.IdPerfilSistema) {
+
+                }
+                Main();
+                Mensaje.close();
+            });
+            ajx.send();
+        });
+    }
+};
+
+
+async function Main() {
+    let _this = this;
+    let IdAnalitico = null;
+    let IdCategoria = null;
+
+    if (Main.ID === null) {
+        Main.ID = "PER.GES-" + getRandomInt(10000, 99999) + "-" + getRandomInt(1000, 9999) + "-" + getRandomInt(100, 999) + "-" + String.fromCharCode(getRandomInt(65, 90));
+    }
+
+    let analitico = get("analitico");
+    let categoria = get("categoria");
+    let filtros = get("filtros");
+
+    let label = analitico.appendChild(document.createElement("label"));
+    label.htmlFor = "iAnaliticoTipoPersona";
+    label.className = "form-label";
+    label.innerHTML = "Ingresa el tipo de persona que buscas";
+
+    let label2 = categoria.appendChild(document.createElement("label"));
+    label2.htmlFor = "iCategoria";
+    label2.className = "form-label";
+    label2.innerHTML = "Ingresa la categoría que buscas";
+
+
+    let input = analitico.appendChild(document.createElement("input"));
+    input.type = "text";
+    input.className = "form-control";
+    input.id = "iAnaliticoTipoPersona";
+    input.placeholder = "Tipo de persona (Directivo, Administrativo, ...)";
+
+    let input2 = categoria.appendChild(document.createElement("input"));
+    input2.type = "text";
+    input2.className = "form-control";
+    input2.id = "iCategoria";
+    input2.placeholder = "Categoría (Profesor CB-I, ...)";
+
+
+
+
+    // Filtros
+    filtros.className = "d-flex";
+    filtros.style = "margin-right:1rem;margin-top:1rem;";
+    let inputSinFolio = filtros.appendChild(document.createElement("input"));
+    inputSinFolio.type = "checkbox";
+    inputSinFolio.className = "form-check-input";
+    inputSinFolio.id = "SinFolio";
+    inputSinFolio.autocomplete = "off";
+    inputSinFolio.disabled = true;
+
+    let labelSinFolio = filtros.appendChild(document.createElement("label"));
+    labelSinFolio.htmlFor = "SinFolio";
+    labelSinFolio.className = "form-check-label";
+    labelSinFolio.innerHTML = "Sin Folio";
+
+    let datalistCategoria = new Datalist(input2, "/RecursosHumanos/foliosplaza/JsonCategorias", "IdCategoria", "Categoria", "Categoria");
+    let datalistAnaliticoTipo = new Datalist(input, "/RecursosHumanos/foliosplaza/JsonAnalitico", "IdAnaliticoTipoPersonal", "Nombre", "Nombre");
+
+
+
+    datalistCategoria.onSelect = function (categoria) {
+        IdCategoria = categoria.IdCategoria;
+        document.getElementById("iAnaliticoTipoPersona").value = "";
+        datalistAnaliticoTipo.removeSelection();
+        document.getElementById("container-secundario").innerHTML = "";
+        document.getElementById("SinFolio").disabled = true;
+        document.getElementById("SinFolio").checked = false;
+    };
+
+    datalistCategoria.activate();
+
+    function tecla(e) {
+        let tecla = (document.all) ? e.keyCode : e.which;
+        if (tecla == 8)
+            datalistCategoria.removeSelection();
+    }
+
+    document.getElementById("iCategoria").onkeyup = function () {
+        tecla(event);
+        document.getElementById("iAnaliticoTipoPersona").value = "";
+        datalistAnaliticoTipo.removeSelection();
+
+        document.getElementById("container-secundario").innerHTML = "";
+        document.getElementById("SinFolio").disabled = true;
+        document.getElementById("SinFolio").checked = false;
+    };
+
+
+    datalistAnaliticoTipo.onSelect = function (analitico) {
+        IdAnalitico = analitico.IdAnaliticoTipoPersonal;
+
+        if (IdAnalitico != undefined && IdCategoria != undefined && document.getElementById("iCategoria").value != "" && document.getElementById("iAnaliticoTipoPersona").value != "") {
+            // JSON DE FOLIOS POR CATEGORIA Y ANALITICO
+            obtenerFolios(IdAnalitico, IdCategoria);
+        } else {
+            alert("Necesitas ingresar la categoría inicialmente para la búsqueda");
+            document.getElementById("iAnaliticoTipoPersona").value = "";
+            datalistAnaliticoTipo.removeSelection();
+        }
+    };
+    datalistAnaliticoTipo.activate();
+
+    document.getElementById("iAnaliticoTipoPersona").onchange = function () {
+        datalistAnaliticoTipo.removeSelection();
+        document.getElementById("SinFolio").checked = false;
+    };
+
+}
+
+let obtenerFolios = function (IdAnalitico, IdCategoria) {
+
+    let _this = this;
+    let foliosPlaza;
+    this.activos = [];
+    this.baja = [];
+    this.resguardo = [];
+    this.sinfolio = [];
+    this.activossinfolio = [];
+    this.bajasinfolio = [];
+    this.resguardosinfolio = [];
+
+
+    if (IdAnalitico != undefined && IdCategoria != undefined) {
+
+        // JSON DE FOLIOS POR CATEGORIA Y ANALITICO
+        DAO.ajax("/RecursosHumanos/foliosplaza/JsonFoliosPersonalCat", "IdAnalitico=" + IdAnalitico + "&IdCategoria=" + IdCategoria, function (jsonResponse) {
+            foliosPlaza = jsonResponse;
+
+            /*   foliosPlaza.forEach(folio => {
+             switch (folio.IdTipoSituacionCategoria) {
+             case 1:
+             _this.activos.push(folio);
+             break;
+             case 2:
+             _this.baja.push(folio);
+             break;
+             case 4:
+             _this.resguardo.push(folio);
+             break;
+             default:
+             break;
+             }
+             });*/
+
+            foliosPlaza.forEach(folio => {
+                switch (folio.FolioPlaza) {
+                    case "":
+                        _this.sinfolio.push(folio);
+                        break;
+                    default:
+                        break;
+                }
+            });
+
+            filtrarFolios(foliosPlaza, _this.activos, _this.baja, _this.resguardo, _this.sinfolio);
+        });
+    }
+};
+
+
+let filtrarFolios = function (folios, activos, baja, resguardo, sinfolio) {
+
+    let _this = this;
+    //COLUMNAS Y DATOS
+    this.columnas = ["Folio Plaza", "Asignado a:","Fecha Asignación", "Situación", "Movimiento", "Jornada", "Horas", "Fecha Final", "Fuente"];
+    this.atributoOriginal = ["FolioPlaza", "C_NombreCompleto", "FechaAsignacionCategoria","IdTipoSituacionCategoria", "IdTipoMovimientoCategoria", "IdTipoJornada", "NumeroHoras", "FechaFinal", "IdFuentePlaza"];
+    let botones = [
+        // {id: "btnModificar", class: "btn btn-sm btn-text-primary btn-icon mdc-ripple-upgraded", icono: "edit"}
+    ];
+
+    procesarFolios(folios);
+
+    // si ninguno esta activo, muestra todos los folios
+    // if (document.getElementById("Baja").checked != true && document.getElementById("Activo").checked != true) {
+    if (folios.length == 0 || folios.length == undefined) {
+        document.getElementById("SinFolio").disabled = true;
+        document.getElementById("SinFolio").checked = false;
+        avisoRegistros("container-secundario", "No existen registros");
+
+    } else {
+        document.getElementById("SinFolio").disabled = false;
+        document.getElementById("SinFolio").checked = false;
+      
+        
+          // primera vez mostramos todos los folios;
+        hacerTabla(folios, "container-secundario", _this.columnas, _this.atributoOriginal, botones);
+    }
+    // }
+    // ACTIVOS
+    // eventosInput("Activo", activos, folios, _this.columnas, _this.atributoOriginal, botones);
+    // BAJA
+    // eventosInput("Baja", baja, folios, _this.columnas, _this.atributoOriginal, botones);
+    // SIN FOLIO COMBINADO
+    eventosInput("SinFolio", sinfolio, folios, _this.columnas, _this.atributoOriginal, botones);
+};
+
+function hacerTabla(json, tabla, columnas, datosAsolicitar, botones, estilos) {
+    tabla = new TablaAnaliticoUsuario(json, tabla, columnas, datosAsolicitar, botones, estilos);
+    tabla.generarTabla();
+}
+
+function avisoRegistros(divTabla, Mensaje) {
+    let tabla = document.getElementById(divTabla);
+    if (tabla.hasChildNodes() == true) {
+        tabla.innerHTML = "";
+        mensaje(tabla, Mensaje);
+    } else {
+        mensaje(tabla, Mensaje);
+    }
+}
+
+function procesarFolios(folios) {
+    // Activo/Baja/Resguardo , AutorizadoSems
+    const situacionCategoria = {
+        1: "Activo",
+        2: "Baja",
+        3: "En uso por un tercero",
+        4: "Resguardo",
+        7: "Temporal",
+        8: "Determinar destino de la plaza"
+    };
+
+    const autorizado = {
+        1: "Sí",
+        0: "No"
+    };
+
+    const tipoMovimiento = {
+        1: "Resguardo",
+        5: "Asignado Temporalmente",
+        6: "Temporalidad",
+        7: "Asignación directa",
+        9: "Asignación por promoción",
+        10: "Sobrante por promoción"
+    };
+
+    const tipoJornada = {
+        0: "-",
+        1: "HSM",
+        2: "MT",
+        3: "TT",
+        4: "TC"
+    };
+
+    const fuentePlaza = {
+        0: "Desconocido",
+        1: "Convenio",
+        2: "Estatal"
+    };
+
+    const nulos = {
+        undefined: "-"
+    };
+
+    folios.forEach(folio => {
+        folio.IdTipoSituacionCategoria = situacionCategoria[folio.IdTipoSituacionCategoria] || folio.IdTipoSituacionCategoria;
+        folio.AutorizoSems = autorizado[folio.Autorizada] || folio.Autorizada;
+        folio.IdTipoMovimientoCategoria = tipoMovimiento[folio.IdTipoMovimientoCategoria] || folio.IdTipoMovimientoCategoria;
+        folio.IdTipoJornada = tipoJornada[folio.IdTipoJornada] || folio.IdTipoJornada;
+        folio.IdFuentePlaza = fuentePlaza[folio.IdFuentePlaza] || folio.IdFuentePlaza;
+        folio.FechaFinal = nulos[folio.FechaFinal] || folio.FechaFinal;
+        folio.NumeroHoras = nulos[folio.NumeroHoras] || folio.NumeroHoras;
+    });
+
+    return folios;
+}
+
+let eventosInput = function (input, datosfiltrados, todos, columnas, atributoOriginal, botones) {
+    document.getElementById(input).onclick = function () {
+        //desactivarChecks(input);
+        if (document.getElementById(input).checked) {
+            hacerTabla(datosfiltrados, "container-secundario", columnas, atributoOriginal, botones);
+        } else {
+            hacerTabla(todos, "container-secundario", columnas, atributoOriginal, botones);
+        }
+    };
+};
+
+let desactivarChecks = function (inputActivado) {
+    const checks = {
+        1: "SinFolio",
+        2: "Baja",
+        3: "Resguardo"
+    };
+
+    for (let i = 1; i < 3; i++) {
+        if (checks[i] !== inputActivado) {
+            //console.log(checks[i] + " -- " + typeof (checks[i]));
+            document.getElementById(checks[i]).checked = false;
+        } else {
+        }
+    }
+};
+
+/*
+let crearLista = function(idsAnaliticos, codigos, hallados, totalPlazas){
+    // CARTA DE ANALITICOS
+        let card = document.getElementById("container-secundario").appendChild(document.createElement("div"));
+        card.className = "card";
+        card.style = "width: 18rem; ";
+        let cardHeader = card.appendChild(document.createElement("card-header"));
+        cardHeader.innerHTML = "Analiticos hallados";
+        let lista = document.getElementById("container-secundario").appendChild(document.createElement("ul"));
+        lista.className = "list-group list-group-flush";
+        
+        for(let i = 0; i < idsAnaliticos.length; i++){
+            let item = lista.appendChild(document.createElement("li"));
+            
+        }
+}
+
+ <div class="card" style="width:18rem ; height: 25rem;">
+                    <div class="card-body">
+                        <h5 class="card-subtitle mb-2 text-body-secondary">Analiticos Hallados</h5>
+                        <div class="row">
+                            <div class="col">Id</div>
+                            <div class="col">Código</div>
+                            <div class="col">Hallados</div>
+                            <div class="col">Plazas Totales</div>
+                        </div>
+                        <div class="row">
+                            <div class="col"></div>
+                            <div class="col"></div>
+                            <div class="col"></div>
+                            <div class="col"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+ * 
+ */
+
