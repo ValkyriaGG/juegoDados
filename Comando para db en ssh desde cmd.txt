@@ -1,0 +1,10 @@
+
+comando para subir una base de datos
+primero se crear la bd en hostinger
+por cmd se colocan los datos cmo si fuera conexion ssh 
+se entra a public_html y ubicas el archivo fisico de la base de datos
+se da este comando mysql -u u123456789_admin -p u123456789_database < database.sql
+de esa manera cargan los datos y todos los query del archivo fisico sin el create data base
+
+
+
